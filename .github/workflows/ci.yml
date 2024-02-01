@@ -1,0 +1,35 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install nightly toolchain
+        run: rustup toolchain add nightly --profile minimal --component rustfmt
+        
+      - name: rustfmt
+        run: cargo +nightly fmt --all --check
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - run: rustup component add clippy
+
+      - name: Clippy (default)
+        run: |
+          cargo clippy --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test --all
